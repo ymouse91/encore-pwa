@@ -101,6 +101,11 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
 #grid::before { left: calc(var(--hcol) * (var(--cell) + 1px)); }
 /* oikea viiva H:n oikealla rajalla */
 #grid::after  { left: calc((var(--hcol) + 1) * (var(--cell) + 1px)); }
+/* Nappien värit peliruudukon värien mukaan */
+.btnOk{background:rgb(51,177,143);}   /* Heitä nopat → vihreä */
+.btnGo{background:rgb(51,142,193);}   /* Vahvista siirto → sininen */
+#dlgYes{background:rgb(51,177,143) !important;}   /* Kyllä → vihreä */
+#dlgNo{background:rgb(214,148,185) !important;}   /* Ei → purppura */
 
   </style>
 </head>
