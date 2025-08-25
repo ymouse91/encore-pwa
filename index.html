@@ -85,6 +85,23 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
 }
 .star svg{ display:block; width:100%; height:100%; }
 
+/* H‑sarakkeen valkoinen korostusviiva (kaksinkertainen) */
+#grid { position: relative; }
+#grid::before,
+#grid::after{
+  content:"";
+  position:absolute;
+  top:0; bottom:0;
+  width:4px;                 /* viivan paksuus */
+  background:#fff;           /* valkoinen */
+  pointer-events:none;
+  z-index:5;                 /* tähtien yläpuolelle, mutta on vain rakojen päällä */
+}
+/* vasen viiva H:n vasemmalla rajalla */
+#grid::before { left: calc(var(--hcol) * (var(--cell) + 1px)); }
+/* oikea viiva H:n oikealla rajalla */
+#grid::after  { left: calc((var(--hcol) + 1) * (var(--cell) + 1px)); }
+
   </style>
 </head>
 <body>

@@ -249,6 +249,8 @@ function generateStars(grid, strict=true){
 
 // =================== PIIRTO ===================
 function drawGrid(){
+	gridEl.style.setProperty('--hcol', H_COL);
+
   if(!gridEl) return;
   gridEl.innerHTML="";
   for(let r=0;r<GRID_H;r++){
@@ -380,7 +382,7 @@ function resetGame(){
   state.turn=1; state.ended=false;
   state.msg = usedFallback
     ? "Huom: 1/3/6 ei onnistunut kaikille väreille, käytettiin lähimpiä alueita (ei vierekkäin)."
-    : "Heitä nopat. Valitse väri + lukumäärä → maalaa klöntti → Vahvista. Ensimmäinen siirto sisältää H‑sarakkeen.";
+    : "Heitä nopat. Valitse väri + lukumäärä → Rastita alue → Vahvista. Ensimmäinen siirto aloitetaan keskimmäiseen sarakkeen. Rastien tulee aina olla vierekkäisiä.";
   state.chosenColor=null; state.chosenNumber=null; state.chosenColorIdx=null; state.chosenNumberIdx=null;
   state.allowPick=false; state.colorDice=[]; state.numberDice=[];
   state.score={ columnsClaimed:Array(GRID_W).fill(false), columnsPoints:0, colorCompleted:Array(5).fill(false), colorPoints:0, starsChecked:0, jokersUsed:0 };
