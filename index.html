@@ -19,7 +19,7 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
 
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Encore! (Solo) – PWA</title>
+  <title>Encore! (Solo)</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/encore-192.png" />
   <meta name="theme-color" content="#e9eef7" />
@@ -54,7 +54,16 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
     .title{font-weight:700;}
 
     .diceRow{display:flex; gap:10px; margin-top:8px;}
-    .die{flex:0 0 120px; height:40px; border-radius:8px; background:#e0e0e0; border:1px solid #555; display:flex; align-items:center; justify-content:flex-start; padding:6px 10px; box-sizing:border-box; cursor:pointer;}
+.die{
+  flex:1 1 0;           /* jakautuu tasan rivillä, ei kiinteää leveyttä */
+  min-width:40px;       /* alin leveys ettei katoa kokonaan */
+  height:32px;          /* matalampi, jotta mahtuu paneeliin */
+  font-size:14px;
+  padding:4px;
+  justify-content:center;
+  box-sizing:border-box;
+}
+
     .die.selected{outline:3px solid var(--accent)}
     .die .swatch{width:26px; height:26px; border-radius:6px; border:1px solid #000; margin-right:8px;}
 
@@ -200,7 +209,7 @@ html, body { -webkit-text-size-adjust: 100%; }
 <body>
   <div class="wrap">
     <header>
-      <h1>Encore! (Solo) – PWA</h1>
+      <h1>Encore! (Solo)</h1>
       <button id="installBtn" class="btn">Asenna sovellukseksi</button>
     </header>
 
