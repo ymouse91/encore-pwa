@@ -162,17 +162,18 @@ html, body { -webkit-text-size-adjust: 100%; }
   .panel  { padding: 8px; }
 
   /* nopat kompaktiksi */
-  .die{
-    flex: 0 0 60px;      /* leveys pienempi (aiemmin ~120px) */
-    height: 28px;        /* matalampi */
-    font-size: 12px;
-    padding: 4px 8px;
-    gap: 6px;
+    .die{
+    flex: 1 1 0;            /* ei kiinteää leveyttä, jakaantuvat tasan riville */
+    min-width: 60px;        /* alin leveys ettei tekstit mene kasaan */
+    height: 26px;
+    font-size: 11px;
+    padding: 3px 6px;
+    gap: 4px;
   }
   .die .swatch{
-    width: 18px;
-    height: 18px;
-    border-radius: 4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
   }
 
   /* napit kompaktiksi */
@@ -186,6 +187,12 @@ html, body { -webkit-text-size-adjust: 100%; }
   /* status-boksi tiiviimmäksi */
   .status{ padding: 6px; }
   .statusGrid{ gap: 6px; }
+}
+
+@media (orientation: landscape) and (max-width: 900px) {
+  .status {
+    font-size: 12px;  /* pienempi koko statuspaneelin teksteille */
+  }
 }
 
   </style>
