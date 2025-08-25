@@ -401,15 +401,28 @@ function resetGame(){
 }
 
 function roll(){
-  state.msg=""; state.pending.clear();
-  state.chosenColor=null; state.chosenNumber=null; state.chosenColorIdx=null; state.chosenNumberIdx=null;
-  if(state.ended) return;
-  if(state.turn>SOLO_TURNS){ endGame("30 kierrosta täynnä (SOLO)."); return; }
-  const nColor=2, nNumber=2;
-  state.colorDice=Array.from({length:nColor},()=>randChoice(COLOR_SIDES));
-  state.numberDice=Array.from({length:nNumber},()=>randChoice(NUMBER_SIDES));
-  state.allowPick=true;
+  state.msg = '';
+  state.pending.clear();
+  state.chosenColor = null;
+  state.chosenNumber = null;
+  state.chosenColorIdx = null;
+  state.chosenNumberIdx = null;
+
+  // Estä heitto jos peli on päättynyt
+  if (state.ended) return;
+
+  // Jos jostain syystä ollaan jo viimeisen jälkeen, katkaise
+  if (state.turn > SOLO_TURNS) {
+    endGame('30 kierrosta täynnä (SOLO).');
+    return;
+  }
+
+  const nColor = 2, nNumber = 2;
+  state.colorDice = Array.from({length:nColor},()=>randChoice(COLOR_SIDES));
+  state.numberDice = Array.from({length:nNumber},()=>randChoice(NUMBER_SIDES));
+  state.allowPick = true;
 }
+
 
 function setColorChoice(idx){
   if(!state.allowPick) return;
@@ -587,8 +600,22 @@ function confirmMove(){
   if(state.score.colorCompleted.filter(Boolean).length>=2){ endGame('Kaksi väriä täynnä – peli päättyy.'); redraw(); return; }
 
   state.turn+=1; state.pending.clear(); state.allowPick=false; state.msg='Siirto merkitty. Heitä nopat seuraavalla vuorolla.';
-  if(state.turn>SOLO_TURNS) endGame('30 kierrosta täynnä (SOLO).');
+  // --- tähän asti pisteytykset on tehty ---
+
+  // Päätä peli heti 30. vahvistetun siirron jälkeen
+  if (state.turn === SOLO_TURNS) {
+    endGame('30 kierrosta täynnä (SOLO).');
+    redraw();
+    return;
+  }
+
+  // Muuten siirrytään seuraavaan vuoroon
+  state.turn += 1;
+  state.pending.clear();
+  state.allowPick = false;
+  state.msg = 'Siirto merkitty. Heitä nopat seuraavalla vuorolla.';
   redraw();
+
 }
 
 function endGame(why){ state.ended=true; state.msg=`Peli päättyi: ${why}  Pisteet: ${totalScore()}`; }
