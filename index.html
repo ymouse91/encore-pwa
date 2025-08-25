@@ -58,7 +58,7 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
     .die .swatch{width:26px; height:26px; border-radius:6px; border:1px solid #000; margin-right:8px;}
 
     .rowBtns{display:flex; gap:10px;}
-    .btnOk{background:var(--ok);} .btnGo{background:var(--accent);} .btnNew{background:#7a7a7a; width:100%;}
+    .btnOk{background:var(--ok);} .btnGo{background:var(--accent);} .btnNew{background:#7a7a7a; width:65%;}
 
     .status{background:#eef3fb; border:1px solid #bdbdbd; border-radius:8px; padding:8px;}
     .statusGrid{display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;}
@@ -106,6 +106,17 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
 .btnGo{background:rgb(51,142,193);}   /* Vahvista siirto → sininen */
 #dlgYes{background:rgb(51,177,143) !important;}   /* Kyllä → vihreä */
 #dlgNo{background:rgb(214,148,185) !important;}   /* Ei → purppura */
+
+/* iPhone safe-area paddingit */
+body { padding-top: max(16px, env(safe-area-inset-top));
+       padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+
+/* Varmista, että grid on suhteessa asetettava (H-sarakkeen overlaylle yms.) */
+#grid { position: relative; }
+
+@media (max-width: 420px){
+  .die{ flex: 0 0 96px; height: 34px; }
+}
 
   </style>
 </head>

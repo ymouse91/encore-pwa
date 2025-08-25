@@ -534,9 +534,50 @@ if(installBtn){
   window.addEventListener('appinstalled', ()=>{ installBtn.style.display='none'; });
 }
 
+// --- iPhone auto-fit: skaalataan --cell niin että 15x7 + status mahtuu ruudulle ---
+function setCellSizeForPhone() {
+  // Näytön mitat
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  // Sama kuin CSS:ssäsi: grid-gap = 1px -> 14 välikköä vaakaan, 6 pystyyn
+  const GAP_X = 14, GAP_Y = 6;
+  const gap = 1;
+
+  // Kehyksiä/paddingeja (nykyisestä CSS:stäsi): .wrap padding ~16, .board padding ~8
+  const WRAP_PAD = 16, BOARD_PAD = 8;
+
+  // Arvio status-alueen korkeus (sinulla kaksi riviä tekstiä): ~90 px
+  const STATUS_H = 90;
+
+  // Otsikon ja yläpalkin arvio: ~56 px
+  const HEADER_H = 56;
+
+  // Leveyden mukaan sallittu solukoko
+  const cellByW = Math.floor(
+    (vw - 2*WRAP_PAD - 2*BOARD_PAD - GAP_X*gap) / 15
+  );
+
+  // Korkeuden mukaan sallittu solukoko
+  const cellByH = Math.floor(
+    (vh - HEADER_H - 2*WRAP_PAD - 2*BOARD_PAD - STATUS_H - GAP_Y*gap) / 7
+  );
+
+  // Rajoita järkevään haarukkaan (voit tiukentaa tarvittaessa)
+  const cell = Math.max(22, Math.min(44, cellByW, cellByH));
+
+  document.documentElement.style.setProperty('--cell', `${cell}px`);
+}
+
+// Kutsu käynnistyksessä ja kun ruutu vaihtaa suuntaa / kokoaan
+window.addEventListener('resize', setCellSizeForPhone);
+window.addEventListener('orientationchange', setCellSizeForPhone);
+
 // =================== INIT ===================
 function init(){
+  setCellSizeForPhone();   // <-- tämä ensimmäiseksi
   resetGame();
   redraw();
 }
+
 window.addEventListener('load', init);
