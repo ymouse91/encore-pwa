@@ -136,7 +136,7 @@ html, body { -webkit-text-size-adjust: 100%; }
   /* kompaktit nopat ja napit */
   .die{ flex:0 0 90px; height:32px; }
   .btn{ padding:8px 12px; }
-  .btnNew{ width: 100%; }
+  .btnNew{ width: 60%; }
 
   /* status vähän tiiviimmäksi */
   .status { padding:6px; }
@@ -145,6 +145,48 @@ html, body { -webkit-text-size-adjust: 100%; }
 
 /* (varmistus: H-sarakkeen overlay pysyy päällä) */
 #grid { position: relative; }
+
+/* iPhone safe-area vaaka-asennossa: jätä tilaa lovelle vasemmalle (ja oikealle) */
+@media (orientation: landscape) {
+  /* laita padding .wrapiin (tai vaihtoehtoisesti .boardiin) */
+  .wrap {
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+  }
+}
+
+/* iPhone LANDSCAPE: tiivis hallintapaneeli */
+@media (orientation: landscape) and (max-width: 900px) {
+  /* kapeampi oikea paneeli */
+  .layout { grid-template-columns: 1fr 220px; gap: 10px; }
+  .panel  { padding: 8px; }
+
+  /* nopat kompaktiksi */
+  .die{
+    flex: 0 0 80px;      /* leveys pienempi (aiemmin ~120px) */
+    height: 28px;        /* matalampi */
+    font-size: 12px;
+    padding: 4px 8px;
+    gap: 6px;
+  }
+  .die .swatch{
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+  }
+
+  /* napit kompaktiksi */
+  .btn{
+    padding: 6px 10px;
+    font-size: 13px;     /* >=16px ei pakollinen asennetussa PWA:ssa landscape-tilassa */
+    border-radius: 8px;
+  }
+  .btnNew{ width: 100%; }
+
+  /* status-boksi tiiviimmäksi */
+  .status{ padding: 6px; }
+  .statusGrid{ gap: 6px; }
+}
 
   </style>
 </head>
