@@ -637,7 +637,13 @@ function measureAndSetCell() {
   // Rajaa järkevään haitariin ja ota varmuusvähennys, ettei vuoda yli iOS:ssa
   const cell = Math.max(18, Math.min(44, cellByW, cellByH) - 1);
 
-  document.documentElement.style.setProperty('--cell', `${cell}px`);
+ // Leveys: yksi solun leveys täsmälleen gridin leveydestä ja raoista
+const widthCalc = `calc((100% - ${(GRID_W - 1) * gap}px) / ${GRID_W})`;
+// Korkeus: käytettävä korkeus jaettuna riveillä
+const heightPx  = Math.floor(availH / GRID_H);
+// Aseta suoraan #gridille: min(leveyslasku, korkeuskatto)
+grid.style.setProperty('--cell', `min(${widthCalc}, ${heightPx}px)`);
+
 }
 
 // Debounce iOS:n pienet “resize”‑triggerit (esim. napin painallus)
@@ -652,7 +658,9 @@ window.addEventListener('resize', scheduleMeasure);
 window.addEventListener('orientationchange', () => {
   setTimeout(measureAndSetCell, 250); // odota kääntöä
 });
-
+document.addEventListener('visibilitychange', ()=> {
+  if (document.visibilityState === 'visible') scheduleMeasure();
+});
 // =================== INIT ===================
 function init(){
   measureAndSetCell();  // laske --cell heti

@@ -124,6 +124,28 @@ html, body { -webkit-text-size-adjust: 100%; }
 .board { overflow: hidden; }
 .grid  { width: 100%; box-sizing: border-box; }
 
+/* iPhone LANDSCAPE -sovitus */
+@media (orientation: landscape) {
+  .wrap { padding: 8px; }
+  .board { padding: 6px; overflow: hidden; }  /* estä yli menevä sisältö */
+  .grid  { width: 100%; box-sizing: border-box; }
+
+  /* tee kaksipalstainen myös iPhonessa (kapealla) */
+  .layout { display: grid; grid-template-columns: 1fr 300px; gap: 10px; }
+
+  /* kompaktit nopat ja napit */
+  .die{ flex:0 0 90px; height:32px; }
+  .btn{ padding:8px 12px; }
+  .btnNew{ width: 100%; }
+
+  /* status vähän tiiviimmäksi */
+  .status { padding:6px; }
+  .statusGrid { gap:6px; }
+}
+
+/* (varmistus: H-sarakkeen overlay pysyy päällä) */
+#grid { position: relative; }
+
   </style>
 </head>
 <body>
