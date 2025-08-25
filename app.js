@@ -345,7 +345,7 @@ else if(isColor){
 
 function updateStatus(){
   if(colPtsEl) colPtsEl.textContent=state.score.columnsPoints;
-  if(starsLineEl) starsLineEl.textContent=`−2 × ${state.stars.size - state.score.starsChecked}`;
+  if(starsLineEl) starsLineEl.textContent=`${state.stars.size - state.score.starsChecked}`;
   if(turnEl) turnEl.textContent = `${state.turn} / ${SOLO_TURNS}`;
   if(colorPtsEl) colorPtsEl.textContent=state.score.colorPoints;
   if(jokersEl) jokersEl.textContent=(JOKER_POOL - state.score.jokersUsed);
