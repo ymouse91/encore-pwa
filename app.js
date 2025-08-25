@@ -454,6 +454,72 @@ function onCellClick(r,c){
 
   redraw();
 }
+// Palauttaa true jos nykyisillä nopilla on olemassa vähintään yksi laillinen siirto
+function hasAnyLegalMove(){
+  // Jos ei vielä heitetty nopat, ei estetä heittoa
+  if(!state.colorDice?.length || !state.numberDice?.length) return false;
+
+  // Sallitut värit kahdesta värinopasta (jokeri sallii kaikki)
+  const colorOptions = new Set();
+  for(const v of state.colorDice){
+    if(v === 'JOKER') { [0,1,2,3,4].forEach(c=>colorOptions.add(c)); }
+    else if(v != null) colorOptions.add(v);
+  }
+  if(colorOptions.size === 0) return false;
+
+  // Sallitut määrät kahdesta numeronopasta (jokeri = 1..5)
+  const numberOptions = new Set();
+  for(const n of state.numberDice){
+    if(n === 'JOKER'){ [1,2,3,4,5].forEach(x=>numberOptions.add(x)); }
+    else if(n != null) numberOptions.add(n);
+  }
+  if(numberOptions.size === 0) return false;
+
+  // Apurit: koskettaako valmiita merkintöjä / sisältääkö H-sarakkeen
+  function componentInfo(color, startR, startC, seen){
+    const q=[[startR,startC]];
+    seen.add(`${startR},${startC}`);
+    let size=0, touchesMarked=false, hasH=false;
+    while(q.length){
+      const [r,c]=q.shift();
+      size++;
+      if(c===H_COL) hasH=true;
+      for(const [nr,nc] of neighbors4(r,c)){
+        const k=`${nr},${nc}`;
+        if(state.grid[nr]?.[nc]===color && !state.marked.has(k) && !seen.has(k)){
+          seen.add(k); q.push([nr,nc]);
+        }
+      }
+      // tarkista kosketus jo merkittyihin
+      for(const [nr,nc] of neighbors4(r,c)){
+        if(state.marked.has(`${nr},${nc}`)){ touchesMarked=true; break; }
+      }
+    }
+    return {size, touchesMarked, hasH};
+  }
+
+  const firstMove = state.marked.size === 0;
+
+  // Käy läpi kaikki sallitut värit ja komponentit
+  for(const color of colorOptions){
+    const seen = new Set();
+    for(let r=0;r<GRID_H;r++){
+      for(let c=0;c<GRID_W;c++){
+        const k=`${r},${c}`;
+        if(state.grid[r][c]!==color || state.marked.has(k) || seen.has(k)) continue;
+        const info = componentInfo(color, r, c, seen); // laskee myös koko komponentin
+        // komponentin pitää koskea aiempaa merkintää (tai 1. siirrossa sisältää H-sarakkeen)
+        const adjacencyOk = firstMove ? info.hasH : info.touchesMarked;
+        if(!adjacencyOk) continue;
+        // riittääkö komponentin koko johonkin sallittuun lukumäärään (1..5)
+        for(const n of numberOptions){
+          if(info.size >= n) return true; // löytyy vähintään yksi laillinen klöntti
+        }
+      }
+    }
+  }
+  return false;
+}
 
 function confirmMove(){
   if(!state.allowPick) return;
@@ -535,7 +601,22 @@ if(newBtn) newBtn.addEventListener('click', ()=>{ openDialog(); scheduleMeasure(
 if(dlgYes) dlgYes.addEventListener('click', ()=>{ closeDialog(); resetGame(); redraw(); scheduleMeasure(); });
 if(dlgNo)  dlgNo.addEventListener('click', ()=>{ closeDialog(); state.msg='Uutta peliä ei aloitettu.'; redraw(); scheduleMeasure(); });
 
-if(rollBtn) rollBtn.addEventListener('click', ()=>{ roll(); redraw(); scheduleMeasure(); });
+if(rollBtn) rollBtn.addEventListener('click', ()=>{
+  // Jos nopat on jo heitetty ja valintavaihe käynnissä,
+  // sallitaan ilmainen uudelleenheitto VAIN jos siirtoa ei ole.
+  if(state.allowPick && state.colorDice.length && state.numberDice.length){
+    if(hasAnyLegalMove()){
+      state.msg = 'Siirto on mahdollinen näillä nopilla – et voi heittää uudelleen.';
+      redraw();
+      return;
+    } else {
+      state.msg = 'Ei laillista siirtoa – ilmainen uudelleenheitto.';
+    }
+  }
+  roll();
+  redraw();
+});
+
 if(confirmBtn) confirmBtn.addEventListener('click', ()=>{ confirmMove(); scheduleMeasure(); });
 
 // =================== PWA: INSTALL (valinnainen) ===================
