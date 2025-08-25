@@ -171,6 +171,20 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
     .statusGrid{ gap:6px; }
     .status { font-size:12px; }
   }
+    @media (max-width: 600px){
+    header { display:none; }
+  }
+  /* iPhone portrait: pienempi fontti statusboxissa */
+  @media (orientation: portrait) and (max-width: 600px){
+    .status {
+      font-size: 12px;   /* kokeile 11–13 px sopivaksi */
+      padding: 6px;      /* voit samalla tiivistää paddingia */
+    }
+    .statusGrid {
+      gap: 6px;          /* pienemmät välit solujen välillä */
+    }
+  }
+
 </style>
 
 </head>
