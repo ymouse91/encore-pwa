@@ -519,12 +519,12 @@ function endGame(why){ state.ended=true; state.msg=`Peli päättyi: ${why}  Pist
 function openDialog(){ if(dlgMask) dlgMask.style.display='flex'; }
 function closeDialog(){ if(dlgMask) dlgMask.style.display='none'; }
 
-if(newBtn) newBtn.addEventListener('click', openDialog);
-if(dlgYes) dlgYes.addEventListener('click', ()=>{ closeDialog(); resetGame(); redraw(); });
-if(dlgNo)  dlgNo.addEventListener('click',  ()=>{ closeDialog(); state.msg='Uutta peliä ei aloitettu.'; redraw(); });
+if(newBtn) newBtn.addEventListener('click', ()=>{ openDialog(); scheduleMeasure(); });
+if(dlgYes) dlgYes.addEventListener('click', ()=>{ closeDialog(); resetGame(); redraw(); scheduleMeasure(); });
+if(dlgNo)  dlgNo.addEventListener('click', ()=>{ closeDialog(); state.msg='Uutta peliä ei aloitettu.'; redraw(); scheduleMeasure(); });
 
-if(rollBtn) rollBtn.addEventListener('click', ()=>{ roll(); redraw(); });
-if(confirmBtn) confirmBtn.addEventListener('click', ()=>{ confirmMove(); });
+if(rollBtn) rollBtn.addEventListener('click', ()=>{ roll(); redraw(); scheduleMeasure(); });
+if(confirmBtn) confirmBtn.addEventListener('click', ()=>{ confirmMove(); scheduleMeasure(); });
 
 // =================== PWA: INSTALL (valinnainen) ===================
 let deferredPrompt=null;
@@ -566,7 +566,13 @@ function setCellSizeForPhone() {
   // Rajoita järkevään haarukkaan (voit tiukentaa tarvittaessa)
   const cell = Math.max(22, Math.min(44, cellByW, cellByH));
 
-  document.documentElement.style.setProperty('--cell', `${cell}px`);
+// Leveys: laske yksi solun leveys täsmälleen gridin leveydestä (100%) ja 14:stä 1px-raosta
+const widthCalc = `calc((100% - ${(GRID_W - 1) * gap}px) / ${GRID_W})`;
+// Korkeus: käytettävä korkeus jaetaan 7:llä → px
+const heightPx = Math.floor(availH / GRID_H);
+// Aseta --cell = min(leveyslasku, korkeuskatto) suoraan #gridille (tarkempi kuin :root)
+grid.style.setProperty('--cell', `min(${widthCalc}, ${heightPx}px)`);
+
 }
 
 // Kutsu käynnistyksessä ja kun ruutu vaihtaa suuntaa / kokoaan

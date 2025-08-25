@@ -120,6 +120,9 @@ body { padding-top: max(16px, env(safe-area-inset-top));
 }
 .btn { font-size: 16px; touch-action: manipulation; }
 html, body { -webkit-text-size-adjust: 100%; }
+/* Varmista, ettei mikään pursuile yli ja grid käyttää koko leveyden */
+.board { overflow: hidden; }
+.grid  { width: 100%; box-sizing: border-box; }
 
   </style>
 </head>
