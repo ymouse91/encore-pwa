@@ -23,200 +23,156 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/encore-192.png" />
   <meta name="theme-color" content="#e9eef7" />
-  <style>
-    :root{
-      --bg:#f2f4fa; --panel:#e9eef7; --ink:#141414; --muted:#6b7280; --accent:#1459d9;
-      --ok:#2e7d32; --warn:#b23c17; --btn:#7a7a7a; --white:#fff;
-    }
-    html,body{height:100%; margin:0;}
-    body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:var(--ink);}
-    .wrap{max-width:1200px; margin:0 auto; padding:16px; box-sizing:border-box;}
-    header{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;}
-    h1{font-size:20px; margin:0;}
-    #installBtn{display:none;}
-    .btn{border:none; border-radius:10px; padding:10px 14px; color:var(--white); background:var(--btn); font-weight:600; cursor:pointer}
-    .btn:active{transform:translateY(1px)}
-
-    .layout{display:grid; grid-template-columns: 1fr 380px; gap:16px;}
-    @media (max-width: 980px){ .layout{grid-template-columns: 1fr;} }
-
-    .board{background:#fafafc; border-radius:10px; padding:8px; box-shadow:0 1px 2px rgba(0,0,0,.05); position:relative;}
-    .grid{display:grid; gap:1px; background:#000; border-radius:6px; overflow:hidden;}
-    .cell{width:100%; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; position:relative;}
-    .cell .mark{position:absolute; inset:0;}
-    .cell .mark:before, .cell .mark:after{content:""; position:absolute; left:6px; right:6px; height:2px; background:#000; top:50%; transform-origin:center;}
-    .cell .mark:before{transform:rotate(45deg);} .cell .mark:after{transform:rotate(-45deg);} 
-    .cell.pending{outline:2px solid #fff; outline-offset:-2px}
-    .hcol{position:absolute; top:0; bottom:0; left:calc((var(--hcol))*1fr);}
-
-    .panel{background:var(--panel); border-radius:12px; padding:12px; box-shadow:0 1px 2px rgba(0,0,0,.05);}
-    .section{margin-bottom:14px}
-    .title{font-weight:700;}
-
-    .diceRow{display:flex; gap:10px; margin-top:8px;}
-	
-.die{
-  flex:1 1 0;           /* jakautuu tasan rivillä, ei kiinteää leveyttä */
-  min-width:20px;       /* alin leveys ettei katoa kokonaan */
-  height:32px;          /* matalampi, jotta mahtuu paneeliin */
-  font-size:14px;
-  padding:4px;
-  justify-content:center;
-  box-sizing:border-box;
-}
-
-    .die.selected{outline:3px solid var(--accent)}
-    .die .swatch{width:20px; height:20px; border-radius:4px; border:1px solid #000; margin:0;}
-
-
-    .rowBtns{display:flex; gap:10px;}
-    .btnOk{background:var(--ok);} .btnGo{background:var(--accent);} .btnNew{background:#7a7a7a; width:65%;}
-
-    .status{background:#eef3fb; border:1px solid #bdbdbd; border-radius:8px; padding:8px;}
-    .statusGrid{display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;}
-    .muted{color:var(--muted)}
-
-    /* iPad optimointi: skaalataan solukokoa jotta 15x7 + status mahtuu pysty/vaaka */
-    :root { --cell: 36px; }
-    @media (min-width: 1024px){ :root{ --cell: 44px; } }
-    .grid{ grid-template-columns: repeat(15, var(--cell));}
-
-    /* Dialogi */
-    .dlgMask{position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; z-index:1000}
-    .dlg{background:#fff; border-radius:12px; padding:16px; width:min(360px, 90vw); border:2px solid #555}
-    .dlg h2{margin:0 0 10px 0; font-size:18px}
-    .dlg .actions{display:flex; gap:10px; justify-content:flex-end}
-
-    /* Tähtikuvio */
-.star{
-  position:absolute;
-  left:15%; right:15%;
-  top:15%; bottom:15%;
-  pointer-events:none;
-  z-index:3;              /* nosta tähdet X-merkinnän yläpuolelle */
-}
-.star svg{ display:block; width:100%; height:100%; }
-
-/* H‑sarakkeen valkoinen korostusviiva (kaksinkertainen) */
-#grid { position: relative; }
-#grid::before,
-#grid::after{
-  content:"";
-  position:absolute;
-  top:0; bottom:0;
-  width:4px;                 /* viivan paksuus */
-  background:#fff;           /* valkoinen */
-  pointer-events:none;
-  z-index:5;                 /* tähtien yläpuolelle, mutta on vain rakojen päällä */
-}
-/* vasen viiva H:n vasemmalla rajalla */
-#grid::before { left: calc(var(--hcol) * (var(--cell) + 1px)); }
-/* oikea viiva H:n oikealla rajalla */
-#grid::after  { left: calc((var(--hcol) + 1) * (var(--cell) + 1px)); }
-/* Nappien värit peliruudukon värien mukaan */
-.btnOk{background:rgb(51,177,143);}   /* Heitä nopat → vihreä */
-.btnGo{background:rgb(51,142,193);}   /* Vahvista siirto → sininen */
-#dlgYes{background:rgb(51,177,143) !important;}   /* Kyllä → vihreä */
-#dlgNo{background:rgb(214,148,185) !important;}   /* Ei → purppura */
-
-/* iPhone safe-area paddingit */
-body { padding-top: max(16px, env(safe-area-inset-top));
-       padding-bottom: max(16px, env(safe-area-inset-bottom)); }
-
-/* Varmista, että grid on suhteessa asetettava (H-sarakkeen overlaylle yms.) */
-#grid { position: relative; }
-
-
-.btn { font-size: 16px; touch-action: manipulation; }
-html, body { -webkit-text-size-adjust: 100%; }
-/* Varmista, ettei mikään pursuile yli ja grid käyttää koko leveyden */
-.board { overflow: hidden; }
-.grid  { width: 100%; box-sizing: border-box; }
-
-/* iPhone LANDSCAPE -sovitus */
-@media (orientation: landscape) {
-  .wrap { padding: 8px; }
-  .board { padding: 6px; overflow: hidden; }  /* estä yli menevä sisältö */
-  .grid  { width: 100%; box-sizing: border-box; }
-
-  /* tee kaksipalstainen myös iPhonessa (kapealla) */
-  .layout { display: grid; grid-template-columns: 1fr 300px; gap: 10px; }
-
-  /* kompaktit nopat ja napit */
-
-  .btn{ padding:8px 12px; }
-  .btnNew{ width: 60%; }
-
-  /* status vähän tiiviimmäksi */
-  .status { padding:6px; }
-  .statusGrid { gap:6px; }
-}
-
-/* (varmistus: H-sarakkeen overlay pysyy päällä) */
-#grid { position: relative; }
-
-/* iPhone safe-area vaaka-asennossa: jätä tilaa lovelle vasemmalle (ja oikealle) */
-@media (orientation: landscape) {
-  /* laita padding .wrapiin (tai vaihtoehtoisesti .boardiin) */
-  .wrap {
-    padding-left: max(8px, env(safe-area-inset-left));
-    padding-right: max(8px, env(safe-area-inset-right));
+<style>
+  /* =========================
+     Värit & perusasetukset
+  ========================== */
+  :root{
+    --bg:#f2f4fa; --panel:#e9eef7; --ink:#141414; --muted:#6b7280; --accent:#1459d9;
+    --ok:#2e7d32; --warn:#b23c17; --btn:#7a7a7a; --white:#fff;
+    --cell: 36px;                 /* oletussolukoko – yliajetaan JS:stä tarvittaessa */
   }
-}
-
-/* iPhone LANDSCAPE: tiivis hallintapaneeli */
-@media (orientation: landscape) and (max-width: 900px) {
-  /* kapeampi oikea paneeli */
-  .layout { grid-template-columns: 1fr 220px; gap: 10px; }
-  .panel  { padding: 8px; }
-
-  /* nopat kompaktiksi */
-    .die{
-    flex: 1 1 0;            /* ei kiinteää leveyttä, jakaantuvat tasan riville */
-    min-width: 35px;        /* alin leveys ettei tekstit mene kasaan */
-    height: 26px;
-    font-size: 11px;
-    padding: 3px 6px;
-    gap: 4px;
+  html,body{height:100%; margin:0;}
+  html, body { -webkit-text-size-adjust: 100%; } /* iOS */
+  body{
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background:var(--bg); color:var(--ink);
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
-  .die .swatch{
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
-  }
+  .wrap{max-width:1200px; margin:0 auto; padding:16px; box-sizing:border-box;}
+  header{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;}
+  h1{font-size:20px; margin:0;}
+  #installBtn{display:none;}
 
-  /* napit kompaktiksi */
+  /* =========================
+     Napit
+  ========================== */
   .btn{
-    padding: 6px 10px;
-    font-size: 13px;     /* >=16px ei pakollinen asennetussa PWA:ssa landscape-tilassa */
-    border-radius: 8px;
+    border:none; border-radius:10px; padding:10px 14px; color:var(--white);
+    background:var(--btn); font-weight:600; cursor:pointer; font-size:16px; /* iOS: ei auto-zoom */
+    touch-action: manipulation;
   }
-  .btnNew{ width: 100%; }
+  .btn:active{transform:translateY(1px)}
+  .btnOk{background:rgb(51,177,143);}   /* Heitä nopat → vihreä */
+  .btnGo{background:rgb(51,142,193);}   /* Vahvista siirto → sininen */
+  .btnNew{background:#7a7a7a; width:65%;}
+  #dlgYes{background:rgb(51,177,143) !important;} /* Kyllä → vihreä */
+  #dlgNo{ background:rgb(214,148,185) !important;} /* Ei → purppura */
 
-  /* status-boksi tiiviimmäksi */
-  .status{ padding: 6px; }
-  .statusGrid{ gap: 6px; }
-}
+  /* =========================
+     Layout & paneeli
+  ========================== */
+  .layout{display:grid; grid-template-columns: 1fr 380px; gap:16px;}
+  @media (max-width: 980px){ .layout{grid-template-columns: 1fr;} }
+  .panel{background:var(--panel); border-radius:12px; padding:12px; box-shadow:0 1px 2px rgba(0,0,0,.05);}
+  .section{margin-bottom:14px}
+  .title{font-weight:700;}
 
-@media (orientation: landscape) and (max-width: 900px) {
-  .status {
-    font-size: 12px;  /* pienempi koko statuspaneelin teksteille */
+  /* =========================
+     Pelilauta
+  ========================== */
+  .board{background:#fafafc; border-radius:10px; padding:8px; box-shadow:0 1px 2px rgba(0,0,0,.05); position:relative; overflow:hidden;}
+  .grid{display:grid; gap:1px; background:#000; border-radius:6px; overflow:hidden; width:100%; box-sizing:border-box;
+        grid-template-columns: repeat(15, var(--cell)); }
+  #grid{ position:relative; } /* H-sarakeoverlaylle */
+  .cell{width:100%; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; position:relative;}
+  .cell .mark{position:absolute; inset:0;}
+  .cell .mark:before, .cell .mark:after{
+    content:""; position:absolute; left:6px; right:6px; height:2px; background:#000; top:50%; transform-origin:center;
   }
-}
+  .cell .mark:before{transform:rotate(45deg);}
+  .cell .mark:after {transform:rotate(-45deg);}
+  .cell.pending{outline:2px solid #fff; outline-offset:-2px}
 
-/* LOPULLINEN: nopat joustaviksi kapeassa paneelissa */
-@media (orientation: landscape) and (max-width: 900px){
-  .diceRow > .die{
-    flex: 1 1 0 !important;   /* jakautuvat tasan riville */
-    min-width: 34px;          /* alin leveys */
-    height: 26px;
-    padding: 3px 4px;
-    font-size: 13px;
-    justify-content: center;
+  /* Tähtikuvio */
+  .star{
+    position:absolute; left:15%; right:15%; top:15%; bottom:15%;
+    pointer-events:none; z-index:3;
   }
-}
+  .star svg{ display:block; width:100%; height:100%; }
 
-  </style>
+  /* H‑sarakkeen valkoinen korostusviiva (kaksinkertainen) */
+  #grid::before, #grid::after{
+    content:""; position:absolute; top:0; bottom:0; width:4px; background:#fff; pointer-events:none; z-index:5;
+  }
+  #grid::before { left: calc(var(--hcol) * (var(--cell) + 1px)); }
+  #grid::after  { left: calc((var(--hcol) + 1) * (var(--cell) + 1px)); }
+
+  /* =========================
+     Nopat
+  ========================== */
+  .diceRow{display:flex; gap:10px; margin-top:8px;}
+  .die{
+    /* joustava – mahtuu kapeaan paneeliin */
+    flex:1 1 0; min-width:20px; height:32px; font-size:14px; padding:4px;
+    justify-content:center; box-sizing:border-box; display:flex; align-items:center; gap:6px;
+    background:#e0e0e0; border:1px solid #555; border-radius:8px; cursor:pointer;
+  }
+  .die.selected{outline:3px solid var(--accent)}
+  .die .swatch{width:20px; height:20px; border-radius:4px; border:1px solid #000; margin:0;}
+
+  .rowBtns{display:flex; gap:10px;}
+
+  /* =========================
+     Status-boksi
+  ========================== */
+  .status{background:#eef3fb; border:1px solid #bdbdbd; border-radius:8px; padding:8px;}
+  .statusGrid{display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;}
+  .muted{color:var(--muted)}
+
+  /* =========================
+     Dialogi
+  ========================== */
+  .dlgMask{position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; z-index:1000}
+  .dlg{background:#fff; border-radius:12px; padding:16px; width:min(360px, 90vw); border:2px solid #555}
+  .dlg h2{margin:0 0 10px 0; font-size:18px}
+  .dlg .actions{display:flex; gap:10px; justify-content:flex-end}
+
+  /* =========================
+     Desktop/tablet – suurempi solu
+  ========================== */
+  @media (min-width: 1024px){
+    :root{ --cell: 44px; }
+  }
+
+  /* =========================
+     iPhone: landscape yleiset
+  ========================== */
+  @media (orientation: landscape){
+    .wrap { padding: 8px; padding-left: max(8px, env(safe-area-inset-left)); padding-right: max(8px, env(safe-area-inset-right)); }
+    .board{ padding: 6px; }
+    .layout{ grid-template-columns: 1fr 300px; gap:10px; }
+    .btn{ padding:8px 12px; }
+    .btnNew{ width:60%; }
+    .status{ padding:6px; }
+    .statusGrid{ gap:6px; }
+  }
+
+  /* =========================
+     iPhone: landscape – tiivis paneeli
+  ========================== */
+  @media (orientation: landscape) and (max-width: 900px){
+    /* kapeampi oikea paneeli */
+    .layout { grid-template-columns: 1fr 220px; }
+
+    /* nopat kompakteiksi ja varmasti joustaviksi */
+    .diceRow > .die{
+      flex:1 1 0 !important; min-width:34px; height:26px; padding:3px 4px; font-size:13px; justify-content:center;
+    }
+    .die .swatch{ width:14px; height:14px; border-radius:3px; }
+
+    /* napit kompaktiksi */
+    .btn{ padding:6px 10px; font-size:13px; border-radius:8px; }
+    .btnNew{ width:100%; }
+
+    /* status kompaktiksi */
+    .status{ padding:6px; }
+    .statusGrid{ gap:6px; }
+    .status { font-size:12px; }
+  }
+</style>
+
 </head>
 <body>
   <div class="wrap">
