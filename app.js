@@ -573,11 +573,86 @@ function setCellSizeForPhone() {
 window.addEventListener('resize', setCellSizeForPhone);
 window.addEventListener('orientationchange', setCellSizeForPhone);
 
+// --- iPhone auto-fit (turvallinen mitoitus, ei leikkauksia) ---
+function getVV() {
+  // VisualViewport kun saatavilla, muuten fallback
+  const vv = window.visualViewport;
+  return {
+    width: Math.floor(vv ? vv.width : document.documentElement.clientWidth),
+    height: Math.floor(vv ? vv.height : window.innerHeight),
+    scale: vv ? vv.scale : 1
+  };
+}
+
+function px(n){ return isNaN(n) ? 0 : n; }
+
+function measureAndSetCell() {
+  const board = document.querySelector('.board');
+  const grid  = document.getElementById('grid');
+  if (!board || !grid) return;
+
+  // Saatavilla oleva LEVEYS: boardin sisältöleveys
+  const boardRect = board.getBoundingClientRect();
+  const csBoard = getComputedStyle(board);
+  const padX = px(parseFloat(csBoard.paddingLeft)) + px(parseFloat(csBoard.paddingRight));
+
+  const csGrid = getComputedStyle(grid);
+  // grid-gap
+  const gap = px(parseFloat(csGrid.gap)) || 1;
+  const gapsX = (15 - 1) * gap;   // 14 väliä
+  const gapsY = (7  - 1) * gap;   // 6 väliä
+
+  const availW = Math.floor(boardRect.width - padX - gapsX);
+
+  // Saatavilla oleva KORKEUS: visual viewport - header - wrap padding - board padding - status
+  const vv = getVV();
+
+  // Mitataan header + status oikeasti DOM:ista (tarkempi kuin arvaus)
+  const header = document.querySelector('header');
+  const status = document.querySelector('.status');
+  const wrap   = document.querySelector('.wrap');
+
+  const headerH = header ? header.getBoundingClientRect().height : 0;
+  const statusH = status ? status.getBoundingClientRect().height : 0;
+
+  const csWrap  = wrap ? getComputedStyle(wrap) : null;
+  const wrapPadY = wrap ? (px(parseFloat(csWrap.paddingTop)) + px(parseFloat(csWrap.paddingBottom))) : 0;
+  const padY = px(parseFloat(csBoard.paddingTop)) + px(parseFloat(csBoard.paddingBottom));
+
+  // Jätä hieman varaa iOS:n työkalurivien vaihtelulle (safe margin)
+  const SAFE = 6;
+
+  const availH = Math.floor(vv.height - headerH - wrapPadY - padY - statusH - gapsY - SAFE);
+
+  // Solukoko molempien suuntien mukaan
+  const cellByW = Math.floor(availW / 15);
+  const cellByH = Math.floor(availH / 7);
+
+  // Rajaa järkevään haitariin ja ota varmuusvähennys, ettei vuoda yli iOS:ssa
+  const cell = Math.max(18, Math.min(44, cellByW, cellByH) - 1);
+
+  document.documentElement.style.setProperty('--cell', `${cell}px`);
+}
+
+// Debounce iOS:n pienet “resize”‑triggerit (esim. napin painallus)
+let _resizeT = null;
+function scheduleMeasure() {
+  if (_resizeT) cancelAnimationFrame(_resizeT);
+  _resizeT = requestAnimationFrame(measureAndSetCell);
+}
+
+// Reagoi vain olennaisiin muutoksiin
+window.addEventListener('resize', scheduleMeasure);
+window.addEventListener('orientationchange', () => {
+  setTimeout(measureAndSetCell, 250); // odota kääntöä
+});
+
 // =================== INIT ===================
 function init(){
-  setCellSizeForPhone();   // <-- tämä ensimmäiseksi
+  measureAndSetCell();  // laske --cell heti
   resetGame();
   redraw();
 }
+
 
 window.addEventListener('load', init);

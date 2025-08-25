@@ -15,7 +15,8 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
 <html lang="fi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Encore! (Solo) – PWA</title>
@@ -117,6 +118,8 @@ body { padding-top: max(16px, env(safe-area-inset-top));
 @media (max-width: 420px){
   .die{ flex: 0 0 96px; height: 34px; }
 }
+.btn { font-size: 16px; touch-action: manipulation; }
+html, body { -webkit-text-size-adjust: 100%; }
 
   </style>
 </head>
