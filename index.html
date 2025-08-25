@@ -66,7 +66,8 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
 }
 
     .die.selected{outline:3px solid var(--accent)}
-    .die .swatch{width:26px; height:26px; border-radius:6px; border:1px solid #000; margin-right:8px;}
+    .die .swatch{width:20px; height:20px; border-radius:4px; border:1px solid #000; margin:0;}
+
 
     .rowBtns{display:flex; gap:10px;}
     .btnOk{background:var(--ok);} .btnGo{background:var(--accent);} .btnNew{background:#7a7a7a; width:65%;}
@@ -125,9 +126,7 @@ body { padding-top: max(16px, env(safe-area-inset-top));
 /* Varmista, että grid on suhteessa asetettava (H-sarakkeen overlaylle yms.) */
 #grid { position: relative; }
 
-@media (max-width: 420px){
-  .die{ flex: 0 0 96px; height: 34px; }
-}
+
 .btn { font-size: 16px; touch-action: manipulation; }
 html, body { -webkit-text-size-adjust: 100%; }
 /* Varmista, ettei mikään pursuile yli ja grid käyttää koko leveyden */
@@ -144,7 +143,7 @@ html, body { -webkit-text-size-adjust: 100%; }
   .layout { display: grid; grid-template-columns: 1fr 300px; gap: 10px; }
 
   /* kompaktit nopat ja napit */
-  .die{ flex:0 0 90px; height:32px; }
+
   .btn{ padding:8px 12px; }
   .btnNew{ width: 60%; }
 
@@ -202,6 +201,18 @@ html, body { -webkit-text-size-adjust: 100%; }
 @media (orientation: landscape) and (max-width: 900px) {
   .status {
     font-size: 12px;  /* pienempi koko statuspaneelin teksteille */
+  }
+}
+
+/* LOPULLINEN: nopat joustaviksi kapeassa paneelissa */
+@media (orientation: landscape) and (max-width: 900px){
+  .diceRow > .die{
+    flex: 1 1 0 !important;   /* jakautuvat tasan riville */
+    min-width: 34px;          /* alin leveys */
+    height: 26px;
+    padding: 3px 4px;
+    font-size: 13px;
+    justify-content: center;
   }
 }
 
