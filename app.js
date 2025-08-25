@@ -304,20 +304,32 @@ function drawDiceRow(container, arr, isColor, selectedIdx){
     die.style.cssText='flex:0 0 120px;height:40px;border-radius:8px;background:#e0e0e0;border:1px solid #555;display:flex;align-items:center;gap:8px;padding:6px 10px;box-sizing:border-box;cursor:pointer;';
     if(arr && selectedIdx===i) die.style.outline='3px solid #1459d9';
 
-    if(arr && arr[i]!==undefined){
-      const v=arr[i];
-      if(v==='JOKER'){
-        die.textContent='JOKERI';
-      }else if(isColor){
-        const sw=document.createElement('div');
-        sw.style.cssText='width:26px;height:26px;border-radius:6px;border:1px solid #000;';
-        const [R,G,B]=COLORS[v]; sw.style.background=`rgb(${R},${G},${B})`;
-        die.appendChild(sw);
-        const label=document.createElement('span'); label.textContent=COLOR_NAMES[v]; die.appendChild(label);
-      }else{
-        die.textContent=String(v);
-      }
-    }else{
+if(arr && arr[i]!==undefined){
+  const v=arr[i];
+if(v==='JOKER'){
+  // Jokerille isompi symboli
+  const span = document.createElement('span');
+  span.textContent = '◉';   // valitse esim. '◉', '♦', 'J', '♛'
+  span.style.fontSize = '22px';   // tee isoksi
+  die.appendChild(span);
+  die.style.justifyContent = 'center';
+}
+else if(isColor){
+    // Näytä vain värilaatta
+    const sw=document.createElement('div');
+    sw.style.cssText='width:20px;height:20px;border-radius:4px;border:1px solid #000;';
+    const [R,G,B]=COLORS[v]; 
+    sw.style.background=`rgb(${R},${G},${B})`;
+    die.appendChild(sw);
+    die.style.justifyContent='center';
+  }else{
+    // Numeronoppa: näytä vain numero
+    die.textContent=String(v);
+    die.style.justifyContent='center';
+  }
+}
+
+	else{
       die.textContent='—';
     }
 
