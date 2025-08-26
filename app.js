@@ -30,7 +30,7 @@ const DEFAULT_TEMPLATE = [
   "o v k v k k o o p s s o o v v",
   "s v p v v v v p p p k k o v v",
   "s p p v o o s s v v k k o p s",
-  "p o o o o o s s o o o p p p p",
+  "p o o o o p s s o o o p p p p",
   "p s s p p p p k k o p s s s o",
   "k k s s s s p k k k v v v o o",
 ];
