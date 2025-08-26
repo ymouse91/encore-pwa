@@ -402,6 +402,13 @@ function resetGame(){
   state.chosenColor=null; state.chosenNumber=null; state.chosenColorIdx=null; state.chosenNumberIdx=null;
   state.allowPick=false; state.colorDice=[]; state.numberDice=[];
   state.score={ columnsClaimed:Array(GRID_W).fill(false), columnsPoints:0, colorCompleted:Array(5).fill(false), colorPoints:0, starsChecked:0, jokersUsed:0 };
+// resetGame(): varmista että peli on auki ja napit käytettävissä
+state.ended = false;
+state.allowPick = false;
+
+if (typeof rollBtn !== 'undefined' && rollBtn)    rollBtn.disabled = false;
+if (typeof confirmBtn !== 'undefined' && confirmBtn) confirmBtn.disabled = false;
+
 }
 
 function roll(){
