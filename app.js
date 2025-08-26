@@ -346,7 +346,11 @@ else if(isColor){
 function updateStatus(){
   if(colPtsEl) colPtsEl.textContent=state.score.columnsPoints;
   if(starsLineEl) starsLineEl.textContent=`${state.stars.size - state.score.starsChecked}`;
-  if(turnEl) turnEl.textContent = `${state.turn} / ${SOLO_TURNS}`;
+if (turnEl) {
+  const shownTurn = Math.min(state.turn ?? 0, SOLO_TURNS);
+  turnEl.textContent = `${shownTurn} / ${SOLO_TURNS}`;
+}
+
   if(colorPtsEl) colorPtsEl.textContent=state.score.colorPoints;
   if(jokersEl) jokersEl.textContent=(JOKER_POOL - state.score.jokersUsed);
   if(totalEl) totalEl.textContent=totalScore();
@@ -618,7 +622,41 @@ function confirmMove(){
 
 }
 
-function endGame(why){ state.ended=true; state.msg=`Peli päättyi: ${why}  Pisteet: ${totalScore()}`; }
+function endGame(why){
+  // Merkitse peli päättyneeksi
+  state.ended = true;
+  state.allowPick = false;
+
+  // Näytettävä vuoro ei saa ylittää SOLO_TURNS-arvoa
+  state.turn = Math.min(state.turn ?? 0, SOLO_TURNS);
+
+  // Tyhjennä mahdollinen keskeneräinen valinta
+  if (state.pending && typeof state.pending.clear === 'function') {
+    state.pending.clear();
+  }
+
+  // Viesti ja lopulliset pisteet
+  state.msg = `Peli päättyi: ${why}  Pisteet: ${totalScore()}`;
+
+  // Lukitse napit, jos ovat olemassa
+  if (typeof rollBtn !== 'undefined' && rollBtn)    rollBtn.disabled = true;
+  if (typeof confirmBtn !== 'undefined' && confirmBtn) confirmBtn.disabled = true;
+
+  // Sulje mahdollinen dialogi
+  if (typeof closeDialog === 'function') {
+    try { closeDialog(); } catch(_) {}
+  } else if (typeof dlgMask !== 'undefined' && dlgMask) {
+    dlgMask.style.display = 'none';
+  }
+
+  // Päivitä UI
+  if (typeof redraw === 'function') {
+    redraw();
+  } else if (typeof updateStatus === 'function') {
+    updateStatus();
+  }
+}
+
 
 // =================== DIALOGI & NAPIT ===================
 function openDialog(){ if(dlgMask) dlgMask.style.display='flex'; }
