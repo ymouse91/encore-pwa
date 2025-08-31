@@ -633,6 +633,16 @@ function confirmMove(){
 
 }
 
+// 6-portainen palaute pisteistä
+function getScoreFeedback(score){
+  if (score <= -10) return { name: "Katastrofi",            desc: "Paljon tähtiä jäi peittämättä.", emoji:"💥" };
+  if (score <=  -1) return { name: "Heikko yritys",        desc: "Sakkoja kertyi enemmän kuin bonuksia.", emoji:"🌧️" };
+  if (score <=   4) return { name: "Tasapeli nopan kanssa", desc: "Pysyit pinnalla nollan tuntumassa.", emoji:"⚖️" };
+  if (score <=   9) return { name: "Kelpo suoritus",        desc: "Hyvää sarake- ja tähtipeliä.", emoji:"👍" };
+  if (score <=  14) return { name: "Huippupeli",            desc: "Loistavaa optimointia ja ajoitusta.", emoji:"🏅" };
+  return               { name: "Legendaarinen mestari",     desc: "Harvinainen täysosuma!", emoji:"🌟" };
+}
+
 function endGame(why){
   // Merkitse peli päättyneeksi
   state.ended = true;
@@ -646,8 +656,10 @@ function endGame(why){
     state.pending.clear();
   }
 
-  // Viesti ja lopulliset pisteet
-  state.msg = `Peli päättyi: ${why}  Pisteet: ${totalScore()}`;
+  // Viesti ja lopulliset pisteet + palaute
+  const score = (typeof totalScore === 'function') ? totalScore() : 0;
+  const fb = getScoreFeedback(score);
+  state.msg = `Peli päättyi: ${why}\nPisteet: ${score} — ${fb.emoji} ${fb.name}\n${fb.desc}`;
 
   // Lukitse napit, jos ovat olemassa
   if (typeof rollBtn !== 'undefined' && rollBtn)    rollBtn.disabled = true;
@@ -667,6 +679,7 @@ function endGame(why){
     updateStatus();
   }
 }
+
 
 
 // =================== DIALOGI & NAPIT ===================
