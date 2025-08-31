@@ -84,6 +84,17 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
   .cell .mark:before{transform:rotate(45deg);}
   .cell .mark:after {transform:rotate(-45deg);}
   .cell.pending{outline:2px solid #fff; outline-offset:-2px}
+/* Alin pistenumeroiden rivi ruudukossa */
+.colPointCell{
+  background:#fafafc;          /* sama tausta kuin boardissa */
+  font-weight:700;
+  color:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:22px;                 /* matala rivikorkeus */
+  /* Ei aspect-ratiota → ei veny neliöksi */
+}
 
   /* Tähtikuvio */
   .star{
@@ -146,8 +157,8 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
     .btn{ padding:8px 12px; }
     .btnNew{ width:60%; }
     .status{ padding:6px; }
-    .statusGrid{ gap:6px; }
-	header { display:none; }
+    .statusGrid{ gap:6px; }    
+	/*header { display:none; }*/
   }
 
   /* =========================
@@ -201,6 +212,7 @@ Kopioi kunkin osion sisältö omaan tiedostoonsa.
       <div>
         <div class="board">
           <div id="grid" class="grid" aria-label="Pelikenttä 15x7"></div>
+		  
           <div class="status" style="margin-top:8px;">
             <div class="statusGrid">
               <div><span class="muted">Sarakkeet:</span> <span id="colPts">0</span></div>

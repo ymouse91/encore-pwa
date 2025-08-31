@@ -249,49 +249,66 @@ function generateStars(grid, strict=true){
 
 // =================== PIIRTO ===================
 function drawGrid(){
-	gridEl.style.setProperty('--hcol', H_COL);
-
   if(!gridEl) return;
-  gridEl.innerHTML="";
-  for(let r=0;r<GRID_H;r++){
-    for(let c=0;c<GRID_W;c++){
-      const div=document.createElement('div');
-      div.className='cell';
-      const [R,G,B]=COLORS[state.grid[r][c]];
-      // Yhteensopiva syntaksi (kommat)
-      div.style.background=`rgb(${R},${G},${B})`;
-      const k=cellKey(r,c);
+
+  gridEl.style.setProperty('--hcol', H_COL);
+  gridEl.innerHTML = "";
+
+  // --- 1) 7 peliriviä (kuten ennen) ---
+  for(let r=0; r<GRID_H; r++){
+    for(let c=0; c<GRID_W; c++){
+      const div = document.createElement('div');
+      div.className = 'cell';
+
+      const [R,G,B] = COLORS[state.grid[r][c]];
+      div.style.background = `rgb(${R},${G},${B})`;
+
+      const k = cellKey(r,c);
+
       // Tähti
       if(state.stars.has(k)){
-        const holder=document.createElement('div');
-        holder.className='star';
-        holder.innerHTML=`<svg viewBox="0 0 100 100" aria-hidden="true">
-          <polygon points="50,5 61,35 95,35 67,55 78,88 50,70 22,88 33,55 5,35 39,35"
-                   fill="white" stroke="black" stroke-width="4"/>
-        </svg>`;
+        const holder = document.createElement('div');
+        holder.className = 'star';
+        holder.innerHTML = `
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <polygon points="50,5 61,35 95,35 67,55 78,88 50,70 22,88 33,55 5,35 39,35"
+                     fill="white" stroke="black" stroke-width="4"/>
+          </svg>`;
         div.appendChild(holder);
       }
+
       // Merkintä (X)
       if(state.marked.has(k)){
-        const mark=document.createElement('div');
-        mark.innerHTML=`<svg viewBox="0 0 100 100" style="position:absolute;inset:0;">
-          <line x1="12" y1="12" x2="88" y2="88" stroke="black" stroke-width="8" />
-          <line x1="12" y1="88" x2="88" y2="12" stroke="black" stroke-width="8" />
-        </svg>`;
+        const mark = document.createElement('div');
+        mark.innerHTML = `
+          <svg viewBox="0 0 100 100" style="position:absolute;inset:0;">
+            <line x1="12" y1="12" x2="88" y2="88" stroke="black" stroke-width="8" />
+            <line x1="12" y1="88" x2="88" y2="12" stroke="black" stroke-width="8" />
+          </svg>`;
         div.appendChild(mark);
       }
-      // Pending-outline (jos sivusi CSS ei määritä .pending, annetaan inline)
+
+      // Pending-outline
       if(state.pending.has(k)){
         div.classList.add('pending');
-        div.style.outline='2px solid #fff';
-        div.style.outlineOffset='-2px';
+        div.style.outline = '2px solid #fff';
+        div.style.outlineOffset = '-2px';
       }
 
-      div.addEventListener('click',()=>onCellClick(r,c));
+      div.addEventListener('click', ()=>onCellClick(r,c));
       gridEl.appendChild(div);
     }
   }
+
+  // --- 2) Lisärivi pisteille omalla luokalla (EI .cell) ---
+  for(let c=0; c<GRID_W; c++){
+    const p = document.createElement('div');
+    p.className = 'colPointCell';
+    p.textContent = COL_FIRST[c];
+    gridEl.appendChild(p);
+  }
 }
+
 
 function drawDiceRow(container, arr, isColor, selectedIdx){
   if(!container) return;
@@ -424,7 +441,7 @@ function roll(){
 
   // Jos jostain syystä ollaan jo viimeisen jälkeen, katkaise
   if (state.turn > SOLO_TURNS) {
-    endGame('30 kierrosta täynnä (SOLO).');
+    endGame('Kierrokset täynnä (SOLO).');
     return;
   }
 
@@ -614,26 +631,25 @@ function confirmMove(){
 
   if(state.score.colorCompleted.filter(Boolean).length>=2){ endGame('Kaksi väriä täynnä – peli päättyy.'); redraw(); return; }
 
-state.chosenColorIdx = null;
-state.chosenNumberIdx = null;
+  state.chosenColorIdx = null;
+  state.chosenNumberIdx = null;
+  state.chosenColor  = null;             // varmistetaan ettei render merkitse valituksi
+  state.chosenNumber = null;
 
+  // Päivitä vuoro (vain KERRAN), tyhjennä pending ja estä uudet valinnat
+  state.turn += 1;
+  state.pending.clear();
+  state.allowPick = false;
 
-  state.turn+=1; state.pending.clear(); state.allowPick=false; state.msg='Siirto merkitty. Heitä nopat seuraavalla vuorolla.';
-  // --- tähän asti pisteytykset on tehty ---
-
-  // Päätä peli heti maksimi siirron jälkeen
-  if (state.turn === SOLO_TURNS) {
-    endGame('30 kierrosta täynnä (SOLO).');
+  // Peli poikki jos maksimikierrokset ylitetty
+  if (state.turn > SOLO_TURNS) {
+    endGame('Kierrokset täynnä (SOLO).');
     redraw();
     return;
   }
 
-  // Muuten siirrytään seuraavaan vuoroon
-  state.turn += 1;
-  state.pending.clear();
-  state.allowPick = false;
+  // Viesti ja UI-päivitys
   state.msg = 'Siirto merkitty. Heitä nopat seuraavalla vuorolla.';
-  
   redraw();
 
 }
@@ -714,68 +730,50 @@ if(rollBtn) rollBtn.addEventListener('click', ()=>{
 if(confirmBtn) confirmBtn.addEventListener('click', ()=>{ confirmMove(); scheduleMeasure(); });
 
 // =================== PWA: INSTALL (valinnainen) ===================
-let deferredPrompt=null;
-if(installBtn){
-  window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; installBtn.style.display='inline-block'; });
-  installBtn.addEventListener('click', async ()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); deferredPrompt=null; installBtn.style.display='none'; });
-  window.addEventListener('appinstalled', ()=>{ installBtn.style.display='none'; });
+let deferredPrompt = null;
+if (installBtn) {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'inline-block';
+  });
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt = null;
+    installBtn.style.display = 'none';
+  });
+  window.addEventListener('appinstalled', () => {
+    installBtn.style.display = 'none';
+  });
 }
 
-// --- iPhone auto-fit: skaalataan --cell niin että 15x7 + status mahtuu ruudulle ---
-function setCellSizeForPhone() {
-  // Näytön mitat
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-
-  // Sama kuin CSS:ssäsi: grid-gap = 1px -> 14 välikköä vaakaan, 6 pystyyn
-  const GAP_X = 14, GAP_Y = 6;
-  const gap = 1;
-
-  // Kehyksiä/paddingeja (nykyisestä CSS:stäsi): .wrap padding ~16, .board padding ~8
-  const WRAP_PAD = 16, BOARD_PAD = 8;
-
-  // Arvio status-alueen korkeus (sinulla kaksi riviä tekstiä): ~90 px
-  const STATUS_H = 90;
-
-  // Otsikon ja yläpalkin arvio: ~56 px
-  const HEADER_H = 56;
-
-  // Leveyden mukaan sallittu solukoko
-  const cellByW = Math.floor(
-    (vw - 2*WRAP_PAD - 2*BOARD_PAD - GAP_X*gap) / 15
-  );
-
-  // Korkeuden mukaan sallittu solukoko
-  const cellByH = Math.floor(
-    (vh - HEADER_H - 2*WRAP_PAD - 2*BOARD_PAD - STATUS_H - GAP_Y*gap) / 7
-  );
-
-  // Rajoita järkevään haarukkaan (voit tiukentaa tarvittaessa)
-  const cell = Math.max(22, Math.min(44, cellByW, cellByH));
-
-// Leveys: laske yksi solun leveys täsmälleen gridin leveydestä (100%) ja 14:stä 1px-raosta
-const widthCalc = `calc((100% - ${(GRID_W - 1) * gap}px) / ${GRID_W})`;
-// Korkeus: käytettävä korkeus jaetaan 7:llä → px
-const heightPx = Math.floor(availH / GRID_H);
-// Aseta --cell = min(leveyslasku, korkeuskatto) suoraan #gridille (tarkempi kuin :root)
-grid.style.setProperty('--cell', `min(${widthCalc}, ${heightPx}px)`);
-
-}
-
-// Kutsu käynnistyksessä ja kun ruutu vaihtaa suuntaa / kokoaan
-window.addEventListener('resize', setCellSizeForPhone);
-window.addEventListener('orientationchange', setCellSizeForPhone);
-
-// --- iPhone auto-fit (turvallinen mitoitus, ei leikkauksia) ---
+// =================== iOS/Android/desktop: turvallinen automitoitus ===================
 function getVV() {
-  // VisualViewport kun saatavilla, muuten fallback
   const vv = window.visualViewport;
   return {
-    width: Math.floor(vv ? vv.width : document.documentElement.clientWidth),
+    width:  Math.floor(vv ? vv.width  : document.documentElement.clientWidth),
     height: Math.floor(vv ? vv.height : window.innerHeight),
-    scale: vv ? vv.scale : 1
+    scale:  vv ? vv.scale : 1
   };
 }
+// ==== Skaalaus: mittaa ja aseta --cell min(calcWidth, heightPx) ====
+
+function setCellFromWidthOnly(){
+  const grid = document.getElementById('grid');
+  if (!grid) return;
+
+  // .grid: gap on 1px (tai mikä CSS:ssä on). Lasketaan 14 väliä.
+  const gap = parseFloat(getComputedStyle(grid).gap) || 1;
+  const gapsPx = (GRID_W - 1) * gap; // 14 * gap
+
+  // Yhden solun leveys = (gridin 100% leveys - kaikki välit) / 15
+  grid.style.setProperty('--cell', `calc((100% - ${gapsPx}px) / ${GRID_W})`);
+}
+
+window.addEventListener('load', setCellFromWidthOnly);
+// (valinnainen) jos gap vaihtuu media-queryllä:
+window.addEventListener('resize', setCellFromWidthOnly);
 
 function px(n){ return isNaN(n) ? 0 : n; }
 
@@ -784,23 +782,28 @@ function measureAndSetCell() {
   const grid  = document.getElementById('grid');
   if (!board || !grid) return;
 
-  // Saatavilla oleva LEVEYS: boardin sisältöleveys
-  const boardRect = board.getBoundingClientRect();
   const csBoard = getComputedStyle(board);
+  const csGrid  = getComputedStyle(grid);
+
+  // boardin sisältöleveys (ilman paddingeja)
+  const boardRect = board.getBoundingClientRect();
   const padX = px(parseFloat(csBoard.paddingLeft)) + px(parseFloat(csBoard.paddingRight));
+  const availW = Math.max(0, Math.floor(boardRect.width - padX));
 
-  const csGrid = getComputedStyle(grid);
-  // grid-gap
-  const gap = px(parseFloat(csGrid.gap)) || 1;
-  const gapsX = (15 - 1) * gap;   // 14 väliä
-  const gapsY = (7  - 1) * gap;   // 6 väliä
+  // grid-gap (px) ja välikköjen määrä
+  const gap   = px(parseFloat(csGrid.gap)) || 1;
+  const gapsX = (GRID_W - 1) * gap;   // 14 väliä
+  const gapsY = (GRID_H - 1) * gap;   // 6 väliä
 
-  const availW = Math.floor(boardRect.width - padX - gapsX);
+  // Pisterivin korkeus (mitataan jos olemassa; muuten oletus)
+  let pointsH = 18;
+  const pointCell = grid.querySelector('.colPointCell');
+  if (pointCell) pointsH = Math.max(12, Math.round(pointCell.getBoundingClientRect().height));
 
-  // Saatavilla oleva KORKEUS: visual viewport - header - wrap padding - board padding - status
-  const vv = getVV();
+  // Visual viewport (iOS-työkalurivit huomioiden)
+  const vvH = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
 
-  // Mitataan header + status oikeasti DOM:ista (tarkempi kuin arvaus)
+  // header/status/wrap-padding + board-padding pystysuunnassa
   const header = document.querySelector('header');
   const status = document.querySelector('.status');
   const wrap   = document.querySelector('.wrap');
@@ -808,52 +811,48 @@ function measureAndSetCell() {
   const headerH = header ? header.getBoundingClientRect().height : 0;
   const statusH = status ? status.getBoundingClientRect().height : 0;
 
-  const csWrap  = wrap ? getComputedStyle(wrap) : null;
-  const wrapPadY = wrap ? (px(parseFloat(csWrap.paddingTop)) + px(parseFloat(csWrap.paddingBottom))) : 0;
-  const padY = px(parseFloat(csBoard.paddingTop)) + px(parseFloat(csBoard.paddingBottom));
+  const wrapCS   = wrap ? getComputedStyle(wrap) : null;
+  const wrapPadY = wrap ? (px(parseFloat(wrapCS.paddingTop)) + px(parseFloat(wrapCS.paddingBottom))) : 0;
+  const padY     = px(parseFloat(csBoard.paddingTop)) + px(parseFloat(csBoard.paddingBottom));
 
-  // Jätä hieman varaa iOS:n työkalurivien vaihtelulle (safe margin)
-  const SAFE = 6;
+  const SAFE = 2; // pieni marginaali
 
-  const availH = Math.floor(vv.height - headerH - wrapPadY - padY - statusH - gapsY - SAFE);
+  // Pelisoluille käytettävä korkeus = koko viewport - muut pystyelementit - gridin gapit - pisterivi
+  const availH = Math.max(0, Math.floor(vvH - headerH - wrapPadY - padY - statusH - gapsY - pointsH - SAFE));
 
-  // Solukoko molempien suuntien mukaan
-  const cellByW = Math.floor(availW / 15);
-  const cellByH = Math.floor(availH / 7);
-
-  // Rajaa järkevään haitariin ja ota varmuusvähennys, ettei vuoda yli iOS:ssa
-  const cell = Math.max(18, Math.min(44, cellByW, cellByH) - 1);
-
- // Leveys: yksi solun leveys täsmälleen gridin leveydestä ja raoista
-const widthCalc = `calc((100% - ${(GRID_W - 1) * gap}px) / ${GRID_W})`;
-// Korkeus: käytettävä korkeus jaettuna riveillä
-const heightPx  = Math.floor(availH / GRID_H);
-// Aseta suoraan #gridille: min(leveyslasku, korkeuskatto)
-grid.style.setProperty('--cell', `min(${widthCalc}, ${heightPx}px)`);
+  // ---- Ydinkaava: min(leveyden perusteella, korkeuden perusteella) ----
+  const widthCalc = `calc((100% - ${(GRID_W - 1) * gap}px) / ${GRID_W})`; // n. (gridLeveys - gapit)/15
+  const heightPx  = Math.floor(availH / GRID_H);                           // n. käytettävä korkeus / 7
 
 }
 
-// Debounce iOS:n pienet “resize”‑triggerit (esim. napin painallus)
+// ==== Päivitykset aina kun mitat muuttuvat ====
+window.addEventListener('load', measureAndSetCell);
+window.addEventListener('resize', measureAndSetCell);
+window.addEventListener('orientationchange', () => setTimeout(measureAndSetCell, 150));
+if (window.visualViewport) window.visualViewport.addEventListener('resize', measureAndSetCell);
+
+// tärkeä: päivitä myös kun .board:n laatikko muuttuu (paneelin leveys tms.)
+const boardEl = document.querySelector('.board');
+if (boardEl && 'ResizeObserver' in window) {
+  const ro = new ResizeObserver(() => measureAndSetCell());
+  ro.observe(boardEl);
+}
+
+
+// Debounce pienille resize-tapahtumille
 let _resizeT = null;
 function scheduleMeasure() {
   if (_resizeT) cancelAnimationFrame(_resizeT);
   _resizeT = requestAnimationFrame(measureAndSetCell);
 }
 
-// Reagoi vain olennaisiin muutoksiin
-window.addEventListener('resize', scheduleMeasure);
-window.addEventListener('orientationchange', () => {
-  setTimeout(measureAndSetCell, 250); // odota kääntöä
-});
-document.addEventListener('visibilitychange', ()=> {
-  if (document.visibilityState === 'visible') scheduleMeasure();
-});
+
+
 // =================== INIT ===================
 function init(){
   measureAndSetCell();  // laske --cell heti
   resetGame();
   redraw();
 }
-
-
 window.addEventListener('load', init);
