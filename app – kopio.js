@@ -301,7 +301,7 @@ function drawDiceRow(container, arr, isColor, selectedIdx){
     const die=document.createElement('div');
     die.className='die';
     // jos sivusi CSS:ssä ei ole .die-tyylejä, annetaan kevyet inline-tyylit
-   // die.style.cssText='flex:0 0 120px;height:40px;border-radius:8px;background:#e0e0e0;border:1px solid #555;display:flex;align-items:center;gap:8px;padding:6px 10px;box-sizing:border-box;cursor:pointer;';
+    die.style.cssText='flex:0 0 120px;height:40px;border-radius:8px;background:#e0e0e0;border:1px solid #555;display:flex;align-items:center;gap:8px;padding:6px 10px;box-sizing:border-box;cursor:pointer;';
     if(arr && selectedIdx===i) die.style.outline='3px solid #1459d9';
 
 if(arr && arr[i]!==undefined){
@@ -614,14 +614,10 @@ function confirmMove(){
 
   if(state.score.colorCompleted.filter(Boolean).length>=2){ endGame('Kaksi väriä täynnä – peli päättyy.'); redraw(); return; }
 
-state.chosenColorIdx = null;
-state.chosenNumberIdx = null;
-
-
   state.turn+=1; state.pending.clear(); state.allowPick=false; state.msg='Siirto merkitty. Heitä nopat seuraavalla vuorolla.';
   // --- tähän asti pisteytykset on tehty ---
 
-  // Päätä peli heti maksimi siirron jälkeen
+  // Päätä peli heti 30. vahvistetun siirron jälkeen
   if (state.turn === SOLO_TURNS) {
     endGame('30 kierrosta täynnä (SOLO).');
     redraw();
@@ -633,7 +629,6 @@ state.chosenNumberIdx = null;
   state.pending.clear();
   state.allowPick = false;
   state.msg = 'Siirto merkitty. Heitä nopat seuraavalla vuorolla.';
-  
   redraw();
 
 }
