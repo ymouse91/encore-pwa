@@ -499,7 +499,7 @@ function hasAnyLegalMove(){
   }
   if(numberOptions.size === 0) return false;
 
-  // Apurit: koskettaako valmiita merkintöjä / sisältääkö H-sarakkeen
+  // Apuri: BFS-yhtenäisyys + kosketus
   function componentInfo(color, startR, startC, seen){
     const q=[[startR,startC]];
     seen.add(`${startR},${startC}`);
@@ -514,7 +514,6 @@ function hasAnyLegalMove(){
           seen.add(k); q.push([nr,nc]);
         }
       }
-      // tarkista kosketus jo merkittyihin
       for(const [nr,nc] of neighbors4(r,c)){
         if(state.marked.has(`${nr},${nc}`)){ touchesMarked=true; break; }
       }
@@ -524,26 +523,31 @@ function hasAnyLegalMove(){
 
   const firstMove = state.marked.size === 0;
 
-  // Käy läpi kaikki sallitut värit ja komponentit
+  // Käy läpi kaikki värit × kaikki numero­nopat
   for(const color of colorOptions){
     const seen = new Set();
     for(let r=0;r<GRID_H;r++){
       for(let c=0;c<GRID_W;c++){
         const k=`${r},${c}`;
         if(state.grid[r][c]!==color || state.marked.has(k) || seen.has(k)) continue;
-        const info = componentInfo(color, r, c, seen); // laskee myös koko komponentin
-        // komponentin pitää koskea aiempaa merkintää (tai 1. siirrossa sisältää H-sarakkeen)
+
+        const info = componentInfo(color, r, c, seen);
         const adjacencyOk = firstMove ? info.hasH : info.touchesMarked;
         if(!adjacencyOk) continue;
-        // riittääkö komponentin koko johonkin sallittuun lukumäärään (1..5)
+
+        // nyt tarkistetaan jokaista sallittua numeroa erikseen
         for(const n of numberOptions){
-          if(info.size >= n) return true; // löytyy vähintään yksi laillinen klöntti
+          if(info.size >= n){
+            return true;   // jollakin nopalla onnistuu → true
+          }
         }
       }
     }
   }
-  return false;
+
+  return false; // kaikki väri × numero -yhdistelmät epäonnistuivat
 }
+
 
 function confirmMove(){
   if(!state.allowPick) return;
