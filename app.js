@@ -658,9 +658,9 @@ function confirmMove(){
 function getScoreFeedback(score){
   if (score <= 0) return { name: "Katastrofi",            desc: "Paljon tähtiä jäi peittämättä.", emoji:"💥" };
   if (score <=  11) return { name: "Heikko yritys",        desc: "Sakkoja kertyi enemmän kuin bonuksia.", emoji:"🌧️" };
-  if (score <=  19) return { name: "Tasapeli nopan kanssa", desc: "Pysyit pinnalla nollan tuntumassa.", emoji:"⚖️" };
-  if (score <=  29) return { name: "Kelpo suoritus",        desc: "Hyvää sarake- ja tähtipeliä.", emoji:"👍" };
-  if (score <=  41) return { name: "Huippupeli",            desc: "Loistavaa optimointia ja ajoitusta.", emoji:"🏅" };
+  if (score <=  15) return { name: "Tasapeli nopan kanssa", desc: "Pysyit pinnalla nollan tuntumassa.", emoji:"⚖️" };
+  if (score <=  21) return { name: "Kelpo suoritus",        desc: "Hyvää sarake- ja tähtipeliä.", emoji:"👍" };
+  if (score <=  30) return { name: "Huippupeli",            desc: "Loistavaa optimointia ja ajoitusta.", emoji:"🏅" };
   return               { name: "Legendaarinen mestari",     desc: "Harvinainen täysosuma!", emoji:"🌟" };
 }
 
