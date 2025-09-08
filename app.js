@@ -6,7 +6,7 @@
 // =================== ASETUKSET ===================
 const GRID_W=15, GRID_H=7, H_COL=7; // 0-indeksoitu H
 const STRICT_STARS=true;
-const SOLO_TURNS=35;
+const SOLO_TURNS=30;
 const JOKER_POOL=8;
 
 const COLOR_NAMES=["Sininen","Keltainen","Vihreä","Oranssi","Purppura"];
